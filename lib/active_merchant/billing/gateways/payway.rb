@@ -135,7 +135,7 @@ module ActiveMerchant
         requires!(options, :billing_id)
 
         post = {}
-        add_payment_method(post, credit_card)
+        add_payment_method(post, credit_card, true)
         add_payment_method(post, options[:billing_id])
         commit(:store, post)
       end
@@ -148,11 +148,11 @@ module ActiveMerchant
 
       private
 
-      def add_payment_method(post, payment_method)
+      def add_payment_method(post, payment_method, hide_cvn = false)
         if payment_method.respond_to?(:number)
           post['card.cardHolderName'] = "#{payment_method.first_name} #{payment_method.last_name}"
           post['card.PAN']            = payment_method.number
-          post['card.CVN']            = payment_method.verification_value
+          post['card.CVN']            = payment_method.verification_value unless hide_cvn
           post['card.expiryYear']     = payment_method.year.to_s[-2,2]
           post['card.expiryMonth']    = sprintf('%02d', payment_method.month)
         else
